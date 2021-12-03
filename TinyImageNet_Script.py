@@ -1,18 +1,13 @@
 # %%
-import random
-import PIL
-import matplotlib.pyplot as plt
-import pandas as pd
-import numpy as np
-import torch.nn as nn
-import torchvision
-import torch
-import os
-import copy
-import time
-# %%
+# !wget http://cs231n.stanford.edu/tiny-imagenet-200.zip
+# !unzip -q tiny-imagenet-200.zip
 
 # %%
+import time
+import copy
+
+# %%
+import os
 # if not os.path.exists("tiny-imagenet-200/"):
 #     !wget http: // cs231n.stanford.edu/tiny-imagenet-200.zip
 #     !unzip - q tiny-imagenet-200.zip
@@ -20,6 +15,19 @@ import time
 # else:
 #     print("Data downloaded!")
 
+
+import torch
+import torchvision
+import torch.nn as nn
+
+import numpy as np
+import pandas as pd
+
+import matplotlib.pyplot as plt
+import PIL
+
+import os
+import random
 
 # from utils import helper_plot
 
@@ -167,110 +175,113 @@ val_dataloader = torch.utils.data.DataLoader(
 # model.features[0].weight.data.shape
 
 # %%
-# def plot_filters_single_channel_big(t):
+def plot_filters_single_channel_big(t):
 
-#     #setting the rows and columns
-#     nrows = t.shape[0]*t.shape[2]
-#     ncols = t.shape[1]*t.shape[3]
+    # setting the rows and columns
+    nrows = t.shape[0]*t.shape[2]
+    ncols = t.shape[1]*t.shape[3]
 
+    npimg = np.array(t.numpy(), np.float32)
+    npimg = npimg.transpose((0, 2, 1, 3))
+    npimg = npimg.ravel().reshape(nrows, ncols)
 
-#     npimg = np.array(t.numpy(), np.float32)
-#     npimg = npimg.transpose((0, 2, 1, 3))
-#     npimg = npimg.ravel().reshape(nrows, ncols)
+    npimg = npimg.T
 
-#     npimg = npimg.T
-
-#     fig, ax = plt.subplots(figsize=(ncols/10, nrows/200))
-#     imgplot = sns.heatmap(npimg, xticklabels=False, yticklabels=False, cmap='gray', ax=ax, cbar=False)
-
-# def plot_filters_multi_channel(t):
-
-#     #get the number of kernals
-#     num_kernels = t.shape[0]
-
-#     #define number of columns for subplots
-#     num_cols = 12
-#     #rows = num of kernels
-#     num_rows = num_kernels
-
-#     #set the figure size
-#     fig = plt.figure(figsize=(num_cols,num_rows))
-
-#     #looping through all the kernels
-#     for i in range(t.shape[0]):
-#         ax1 = fig.add_subplot(num_rows,num_cols,i+1)
-
-#         #for each kernel, we convert the tensor to numpy
-#         npimg = np.array(t[i].numpy(), np.float32)
-#         #standardize the numpy image
-#         npimg = (npimg - np.mean(npimg)) / np.std(npimg)
-#         npimg = np.minimum(1, np.maximum(0, (npimg + 0.5)))
-#         npimg = npimg.transpose((1, 2, 0))
-#         ax1.imshow(npimg)
-#         ax1.axis('off')
-#         ax1.set_title(str(i))
-#         ax1.set_xticklabels([])
-#         ax1.set_yticklabels([])
-
-#     plt.savefig('myimage.png', dpi=100)
-#     plt.tight_layout()
-#     plt.show()
+    fig, ax = plt.subplots(figsize=(ncols/10, nrows/200))
+    imgplot = sns.heatmap(npimg, xticklabels=False,
+                          yticklabels=False, cmap='gray', ax=ax, cbar=False)
 
 
-# def plot_filters_single_channel(t):
+def plot_filters_multi_channel(t):
 
-#     #kernels depth * number of kernels
-#     nplots = t.shape[0]*t.shape[1]
-#     ncols = 12
+    # get the number of kernals
+    num_kernels = t.shape[0]
 
-#     nrows = 1 + nplots//ncols
-#     #convert tensor to numpy image
-#     npimg = np.array(t.numpy(), np.float32)
+    # define number of columns for subplots
+    num_cols = 12
+    # rows = num of kernels
+    num_rows = num_kernels
 
-#     count = 0
-#     fig = plt.figure(figsize=(ncols, nrows))
+    # set the figure size
+    fig = plt.figure(figsize=(num_cols, num_rows))
 
-#     #looping through all the kernels in each channel
-#     for i in range(t.shape[0]):
-#         for j in range(t.shape[1]):
-#             count += 1
-#             ax1 = fig.add_subplot(nrows, ncols, count)
-#             npimg = np.array(t[i, j].numpy(), np.float32)
-#             npimg = (npimg - np.mean(npimg)) / np.std(npimg)
-#             npimg = np.minimum(1, np.maximum(0, (npimg + 0.5)))
-#             ax1.imshow(npimg)
-#             ax1.set_title(str(i) + ',' + str(j))
-#             ax1.axis('off')
-#             ax1.set_xticklabels([])
-#             ax1.set_yticklabels([])
+    # looping through all the kernels
+    for i in range(t.shape[0]):
+        ax1 = fig.add_subplot(num_rows, num_cols, i+1)
 
-#     plt.tight_layout()
-#     plt.show()
+        # for each kernel, we convert the tensor to numpy
+        npimg = np.array(t[i].numpy(), np.float32)
+        # standardize the numpy image
+        npimg = (npimg - np.mean(npimg)) / np.std(npimg)
+        npimg = np.minimum(1, np.maximum(0, (npimg + 0.5)))
+        npimg = npimg.transpose((1, 2, 0))
+        ax1.imshow(npimg)
+        ax1.axis('off')
+        ax1.set_title(str(i))
+        ax1.set_xticklabels([])
+        ax1.set_yticklabels([])
 
-# def plot_weights(model, layer_num, single_channel = True, collated = False):
+    plt.savefig('myimage.png', dpi=100)
+    plt.tight_layout()
+    plt.show()
 
-#   #extracting the model features at the particular layer number
-#   layer = model.features[layer_num]
 
-#   #checking whether the layer is convolution layer or not
-#   if isinstance(layer, nn.Conv2d):
-#     #getting the weight tensor data
-#     weight_tensor = model.features[layer_num].weight.data
+def plot_filters_single_channel(t):
 
-#     if single_channel:
-#       if collated:
-#         plot_filters_single_channel_big(weight_tensor)
-#       else:
-#         plot_filters_single_channel(weight_tensor)
+    # kernels depth * number of kernels
+    nplots = t.shape[0]*t.shape[1]
+    ncols = 12
 
-#     else:
-#       if weight_tensor.shape[1] == 3:
-#         plot_filters_multi_channel(weight_tensor)
-#       else:
-#         print("Can only plot weights with three channels with single channel = False")
+    nrows = 1 + nplots//ncols
+    # convert tensor to numpy image
+    npimg = np.array(t.numpy(), np.float32)
 
-#   else:
-#     print("Can only visualize layers which are convolutional")
+    count = 0
+    fig = plt.figure(figsize=(ncols, nrows))
+
+    # looping through all the kernels in each channel
+    for i in range(t.shape[0]):
+        for j in range(t.shape[1]):
+            count += 1
+            ax1 = fig.add_subplot(nrows, ncols, count)
+            npimg = np.array(t[i, j].numpy(), np.float32)
+            npimg = (npimg - np.mean(npimg)) / np.std(npimg)
+            npimg = np.minimum(1, np.maximum(0, (npimg + 0.5)))
+            ax1.imshow(npimg)
+            ax1.set_title(str(i) + ',' + str(j))
+            ax1.axis('off')
+            ax1.set_xticklabels([])
+            ax1.set_yticklabels([])
+
+    plt.tight_layout()
+    plt.show()
+
+
+def plot_weights(model, layer_num, single_channel=True, collated=False):
+
+    # extracting the model features at the particular layer number
+    layer = model.features[layer_num]
+
+    # checking whether the layer is convolution layer or not
+    if isinstance(layer, nn.Conv2d):
+        # getting the weight tensor data
+        weight_tensor = model.features[layer_num].weight.data
+
+        if single_channel:
+            if collated:
+                plot_filters_single_channel_big(weight_tensor)
+            else:
+                plot_filters_single_channel(weight_tensor)
+
+        else:
+            if weight_tensor.shape[1] == 3:
+                plot_filters_multi_channel(weight_tensor)
+            else:
+                print(
+                    "Can only plot weights with three channels with single channel = False")
+
+    else:
+        print("Can only visualize layers which are convolutional")
 
 # %%
 # plot_weights(alexnet.cpu(), 0, single_channel=False)
@@ -301,7 +312,7 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
             running_corrects = 0
 
             # Iterate over data.
-            for index, (inputs, labels) in enumerate(train_dataloader):
+            for index, (inputs, labels) in enumerate(dataloader[phase]):
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 # zero the parameter gradients
@@ -327,8 +338,8 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
             if phase == 'train':
                 scheduler.step()
 
-            epoch_loss = running_loss / len(train_dataloader)
-            epoch_acc = running_corrects.double() / len(train_dataloader)
+            epoch_loss = running_loss / len(dataloader[phase])
+            epoch_acc = running_corrects.double() / len(dataloader[phase])
 
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(
                 phase, epoch_loss, epoch_acc))
@@ -348,6 +359,12 @@ def train_model(model, criterion, optimizer, scheduler, num_epochs=25):
     # load best model weights
     model.load_state_dict(best_model_wts)
     return model
+
+
+# %%
+dataloader = {}
+dataloader['train'] = train_dataloader
+dataloader['val'] = val_dataloader
 
 # %%
 
@@ -399,9 +416,41 @@ exp_lr_scheduler = torch.optim.lr_scheduler.StepLR(
 
 # %%
 model_ft = train_model(model_ft, criterion, optimizer_ft,
-                       exp_lr_scheduler, num_epochs=25)
+                       exp_lr_scheduler, num_epochs=3)
 
 # %%
 # torch.cuda.empty_cache()
 
 # %%
+# plot_weights(model_ft.cpu(), 0, single_channel=False)
+
+# %%
+# model_ft.conv1.weight.data
+
+# %%
+
+# #extracting the model features at the particular layer number
+# layer = model.features[layer_num]
+
+# #checking whether the layer is convolution layer or not
+# if isinstance(layer, nn.Conv2d):
+# getting the weight tensor data
+weight_tensor = model_ft.conv1.weight.data
+
+if False:
+    if collated:
+        plot_filters_single_channel_big(weight_tensor)
+    else:
+        plot_filters_single_channel(weight_tensor)
+
+else:
+    if weight_tensor.shape[1] == 3:
+        plot_filters_multi_channel(weight_tensor)
+    else:
+        print("Can only plot weights with three channels with single channel = False")
+
+# else:
+#   print("Can only visualize layers which are convolutional")
+
+# %%
+torch.save(model_ft.state_dict(), "model_resnet.pt")
